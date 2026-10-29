@@ -14,10 +14,10 @@
     <header class="sticky-top">
         <nav class="navbar navbar-expand-lg navbar-toggleable-sm navbar-dark" style="background-color:#191414
 " bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-ction="Index">
                     <div class="d-flex align-items-center justify-content-center rounded" style="width: 36px; height: 36px; background: rgba(255,255,255,0.2);">
-                        <img src="/images/book.png" style="width: 24px; height: 24px;" />
+                        <img src="BookGarden/Images/book.png" style="width: 24px; height: 24px;" />
                     </div>
                     <span class="fw-bold fs-5 d-none d-sm-inline">Book<span style="color: #1DB954;">garden</span></span>
                 </a>
@@ -25,23 +25,23 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Category" asp-action="Index">Categories</a>
+                            <a class="nav-link " asp-controller="Category" asp-action="Index">Categories</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
