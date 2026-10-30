@@ -1,0 +1,34 @@
+﻿@model BookGarden.Models.Category
+
+<div class="container mt-4">
+    <a asp-controller="Category" asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-arrow-left"></i> Back to categories
+    </a>
+
+    <div class="card fairy-card overflow-hidden">
+        <div class="fairy-card-header">
+            <h5 class="mb-1 fw-bold"><i class="bi bi-plus-circle me-2"></i>Create Category</h5>
+            <p class="mb-0 small fairy-subtitle">Add a new category for your products</p>
+        </div>
+
+        <form method="post" class="card-body fairy-form-body">
+            <div asp-validation-summary="All" class="text-danger mb-3"> </div>
+            <div class="mb-4">
+                <label asp-for="Name" class="fairy-label">Category Name</label>
+                <input asp-for="Name" class="form-control fairy-input" placeholder="Enter category name" />
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DisplayOrder" class="fairy-label">Display Order</label>
+                <input asp-for="DisplayOrder" class="form-control fairy-input" placeholder="Enter display order" />
+            </div>
+
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn btn-fairy-create">
+                    <i class="bi bi-stars me-1"></i>Create Category
+                </button>
+                <a asp-controller="Category" asp-action="Index" class="btn btn-fairy-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
