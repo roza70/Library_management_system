@@ -208,3 +208,60 @@
         color: #c0508a;
         transform: translateY(-2px);
     }
+/* ===== Mint Mix (pink + lavender + light green) ===== */
+:root {
+    --mint-50: #f1fbf5;
+    --mint-100: #dff5e8;
+    --mint-200: #c9f0dc;
+    --mint-300: #a8e6c6;
+    --mint-text: #3f7a5c;
+}
+
+.fairy-body {
+    background-image: linear-gradient(160deg, var(--pink-50) 0%, var(--mint-50) 45%, #f6eeff 75%, var(--peach-200) 100%);
+}
+
+.fairy-navbar {
+    background-image: linear-gradient(90deg, var(--pink-200), var(--lavender-200) 40%, var(--mint-200) 75%, var(--peach-200));
+}
+
+.fairy-card-header {
+    background-image: linear-gradient(120deg, var(--pink-200), var(--lavender-200) 45%, var(--mint-200));
+}
+
+.fairy-footer {
+    background-image: linear-gradient(90deg, var(--mint-200), var(--lavender-200), var(--pink-200));
+}
+
+.fairy-brand-accent {
+    background-image: linear-gradient(90deg, #d86a9f, #5fbf8f);
+}
+
+.fairy-badge {
+    background-image: linear-gradient(135deg, var(--mint-200), var(--pink-200));
+}
+
+/* Edit button: mint, Delete stays pink */
+.btn-fairy-edit {
+    background-color: var(--mint-200);
+    color: var(--mint-text);
+}
+
+    .btn-fairy-edit:hover {
+        background-color: var(--mint-300);
+        color: #2c5c44;
+    }
+
+/* Create page */
+.btn-fairy-create {
+    background-image: linear-gradient(135deg, #f8b6cc, var(--mint-300));
+}
+
+    .btn-fairy-create:hover {
+        background-image: linear-gradient(135deg, #f4a0bd, #8fdcb4);
+    }
+
+.fairy-input:focus {
+    border-color: var(--mint-300);
+    box-shadow: 0 0 0 4px rgba(168, 230, 198, 0.35);
+}
