@@ -39,6 +39,7 @@ namespace BookGarden.Controllers
 
                 _context.Categories.Add(category);
                 _context.SaveChanges();
+                TempData["success"] = "Category created successfully!";
                 return RedirectToAction("Index");
             }
             return View(category);
@@ -73,9 +74,45 @@ namespace BookGarden.Controllers
             {
                 _context.Categories.Update(category);
                 _context.SaveChanges();
+                TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
             }
             return View(category);
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var category = _context.Categories.Find(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(Category category)
+        {
+            var categoryToDelete = _context.Categories.Find(category.CategoryIdentification);
+
+            if (categoryToDelete == null)
+            {
+                return NotFound();
+            }
+
+            _context.Categories.Remove(categoryToDelete);
+            _context.SaveChanges();
+            TempData["success"] = "Category deleted successfully";
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

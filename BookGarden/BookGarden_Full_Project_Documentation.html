@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BookGarden Full Project Documentation</title>
+    <style>
+        @page { margin: 18mm; }
+        body { font-family: "Noto Sans Bengali", "Segoe UI", Arial, sans-serif; color:#222; line-height:1.65; max-width:1000px; margin:0 auto; padding:24px; }
+        h1 { color:#5f2d91; border-bottom:3px solid #d59bdc; padding-bottom:12px; }
+        h2 { color:#6f3a98; margin-top:32px; border-bottom:1px solid #ead8f0; padding-bottom:5px; }
+        h3 { color:#8a4c9f; margin-top:22px; }
+        code { background:#f3eef7; padding:2px 5px; border-radius:4px; }
+        pre { background:#202124; color:#f4f4f4; padding:16px; border-radius:8px; overflow-x:auto; white-space:pre-wrap; font-family:Consolas,monospace; font-size:12px; line-height:1.45; }
+        .box { background:#faf3ff; border-left:5px solid #8e44ad; padding:12px 16px; margin:16px 0; }
+        .warning { background:#fff8e6; border-left-color:#e0a000; }
+        .success { background:#eefaf1; border-left-color:#2d9a50; }
+        table { border-collapse:collapse; width:100%; margin:12px 0 20px; }
+        th,td { border:1px solid #d8c9df; padding:8px; text-align:left; vertical-align:top; }
+        th { background:#f1e5f5; }
+        li { margin:5px 0; }
+        .small { color:#666; font-size:0.92em; }
+        .page-break { page-break-before:always; }
+        @media print { body { padding:0; } pre { white-space:pre-wrap; } }
+    </style>
+</head>
+<body>
+    <h1>BookGarden — Full Project Documentation</h1>
+    <p class="small">এই document-এ বর্তমান project-এর file structure, code purpose, CRUD flow, error fixes, notification system এবং PDF বানানোর নিয়ম ব্যাখ্যা করা হয়েছে।</p>
+
+    <div class="box success">
+        <strong>Project summary:</strong> BookGarden একটি ASP.NET Core MVC application। এতে SQL Server/LocalDB ব্যবহার করে Category create, read, update এবং delete করা যায়। Razor Views দিয়ে UI তৈরি হয়েছে এবং Toastr দিয়ে success/error notification দেখানো হয়।
+    </div>
+
+    <h2>1. Project কীভাবে কাজ করে</h2>
+    <ol>
+        <li>User browser থেকে URL request পাঠায়।</li>
+        <li>ASP.NET Core routing request-টি নির্দিষ্ট Controller action-এ পাঠায়।</li>
+        <li>Controller, <code>ApplicationDbContext</code> ব্যবহার করে database-এর সঙ্গে কাজ করে।</li>
+        <li>Controller একটি Model বা ViewModel view-তে পাঠায়।</li>
+        <li>Razor View HTML তৈরি করে browser-এ পাঠায়।</li>
+        <li>CRUD সফল হলে <code>TempData</code>-তে message রাখা হয় এবং shared notification partial Toastr popup দেখায়।</li>
+    </ol>
+
+    <h2>2. Important project folders এবং files</h2>
+    <table>
+        <tr><th>Path</th><th>Purpose</th></tr>
+        <tr><td><code>Program.cs</code></td><td>Application startup, services, database এবং middleware configuration।</td></tr>
+        <tr><td><code>Data/ApplicationDbContext.cs</code></td><td>Entity Framework Core database context এবং seed data।</td></tr>
+        <tr><td><code>Models/Category.cs</code></td><td>Category data structure এবং validation rules।</td></tr>
+        <tr><td><code>Controllers/CategoryController.cs</code></td><td>Category list, create, update এবং delete operations।</td></tr>
+        <tr><td><code>Views/Category/Index.cshtml</code></td><td>সব category-এর table/list page।</td></tr>
+        <tr><td><code>Views/Category/Create.cshtml</code></td><td>নতুন category তৈরির form।</td></tr>
+        <tr><td><code>Views/Category/Update.cshtml</code></td><td>বর্তমান category edit করার form।</td></tr>
+        <tr><td><code>Views/Category/Delete.cshtml</code></td><td>Delete confirmation page।</td></tr>
+        <tr><td><code>Views/Shared/_Layout.cshtml</code></td><td>সব page-এর common layout, navigation, CSS/JS এবং shared notification।</td></tr>
+        <tr><td><code>Views/Shared/_notification.cshtml</code></td><td>Reusable Toastr success/error notification partial।</td></tr>
+        <tr><td><code>Views/_ViewImports.cshtml</code></td><td>সব Razor view-এর common namespace এবং Tag Helpers।</td></tr>
+        <tr><td><code>Views/_ViewStart.cshtml</code></td><td>সব view-এর জন্য <code>_Layout</code> নির্ধারণ করে।</td></tr>
+        <tr><td><code>wwwroot</code></td><td>CSS, JavaScript এবং অন্যান্য default static files।</td></tr>
+        <tr><td><code>Images/book.png</code></td><td>BookGarden logo image; Program.cs-এ <code>/Image</code> route দিয়ে serve করা হয়।</td></tr>
+        <tr><td><code>Migrations</code></td><td>Database schema change এবং seed data-এর migration files।</td></tr>
+    </table>
+
+    <h2>3. Program.cs — application configuration</h2>
+    <pre>using BookGarden.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+
+var builder = WebApplication.CreateBuilder(args);</pre>
+    <p>এই using statements database context, Entity Framework Core এবং external physical folder থেকে static file serve করার জন্য প্রয়োজন।</p>
+
+    <pre>builder.Services.AddControllersWithViews();</pre>
+    <p>ASP.NET Core MVC-এর Controller এবং Razor View services register করে।</p>
+
+    <pre>builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt;
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection"));
+});</pre>
+    <p>Entity Framework Core-কে SQL Server provider-এর সঙ্গে configure করে। Connection string <code>appsettings.Development.json</code> থেকে নেওয়া হয়।</p>
+
+    <pre>app.UseHttpsRedirection();
+app.UseRouting();
+app.UseAuthorization();</pre>
+    <ul>
+        <li><code>UseHttpsRedirection</code> HTTP request-কে HTTPS-এ পাঠায়।</li>
+        <li><code>UseRouting</code> URL route match করে।</li>
+        <li><code>UseAuthorization</code> authorization middleware চালায়।</li>
+    </ul>
+
+    <pre>app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "Images")),
+    RequestPath = "/Image"
+});</pre>
+    <p>সাধারণত static file শুধু <code>wwwroot</code> থেকে serve হয়। কিন্তু book image <code>Images/book.png</code>-এ আছে। এই configuration-এর কারণে browser-এর <code>/Image/book.png</code> request project-এর <code>Images/book.png</code> file-এ যায়।</p>
+
+    <pre>app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();</pre>
+    <p>Static assets map করে এবং default MVC route তৈরি করে। Default route-এর অর্থ: controller না দিলে <code>Home</code>, action না দিলে <code>Index</code>।</p>
+
+    <h2>4. Database এবং Model</h2>
+    <h3>Category.cs</h3>
+    <pre>public class Category
+{
+    [Key]
+    public int CategoryIdentification { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; } = string.Empty;
+
+    [Range(0,100, ErrorMessage = "Range must be between 0 and 100!!")]
+    public string DisplayOrder { get; set; } = string.Empty;
+}</pre>
+    <ul>
+        <li><code>[Key]</code> বলে <code>CategoryIdentification</code> primary key।</li>
+        <li><code>[Required]</code> বলে Name empty হতে পারবে না।</li>
+        <li><code>[StringLength(100)]</code> Name সর্বোচ্চ 100 characters হতে পারবে।</li>
+        <li><code>[Range(0,100)]</code> DisplayOrder-এর range validation নির্ধারণ করে।</li>
+    </ul>
+    <div class="box warning"><strong>Note:</strong> বর্তমান code-এ <code>DisplayOrder</code> type <code>string</code>, কিন্তু <code>[Range]</code> সাধারণত numeric property-এর জন্য বেশি উপযুক্ত। ভবিষ্যতে এটি <code>int</code> করলে validation আরও নির্ভুল হবে।</div>
+
+    <h3>ApplicationDbContext.cs</h3>
+    <pre>public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions&lt;ApplicationDbContext&gt; options)
+        : base(options) { }
+
+    public DbSet&lt;Category&gt; Categories { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity&lt;Category&gt;().HasData(
+            new Category { CategoryIdentification = 1, Name = "Action", Description = "Action genre books", DisplayOrder = "1" },
+            new Category { CategoryIdentification = 2, Name = "Sci-Fi", Description = "Science fiction books", DisplayOrder = "2" },
+            new Category { CategoryIdentification = 3, Name = "History", Description = "History genre books", DisplayOrder = "3" }
+        );
+    }
+}</pre>
+    <p><code>DbSet&lt;Category&gt;</code> database-এর Categories table represent করে। <code>HasData</code> initial seed data তৈরি করে।</p>
+
+    <h2>5. CategoryController-এর কাজ</h2>
+    <h3>Dependency Injection</h3>
+    <pre>private readonly ApplicationDbContext _context;
+
+public CategoryController(ApplicationDbContext context)
+{
+    _context = context;
+}</pre>
+    <p>ASP.NET Core নিজে <code>ApplicationDbContext</code> inject করে। Controller সরাসরি database connection তৈরি না করে context ব্যবহার করে।</p>
+
+    <h3>Index — সব category দেখানো</h3>
+    <pre>public IActionResult Index()
+{
+    var categories = _context.Categories.ToList();
+    return View(categories);
+}</pre>
+    <p>Database থেকে সব category নিয়ে <code>Views/Category/Index.cshtml</code>-এ Model হিসেবে পাঠায়। আগের error-এর কারণ ছিল <code>return View()</code> ব্যবহার করা; ফলে view-এর Model null ছিল।</p>
+
+    <h3>Create</h3>
+    <pre>[HttpGet]
+public IActionResult Create()
+{
+    return View();
+}</pre>
+    <p>GET request-এ empty create form দেখায়।</p>
+
+    <pre>[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Create(Category category)
+{
+    if (!string.IsNullOrEmpty(category.Name) &amp;&amp;
+        _context.Categories.Any(c =&gt; c.Name.ToLower() == category.Name.ToLower()))
+    {
+        ModelState.AddModelError("", "Category name already exists!");
+    }
+
+    if (ModelState.IsValid)
+    {
+        _context.Categories.Add(category);
+        _context.SaveChanges();
+        TempData["success"] = "Category created successfully!";
+        return RedirectToAction("Index");
+    }
+
+    return View(category);
+}</pre>
+    <ul>
+        <li>POST form থেকে Category object receive করে।</li>
+        <li>আগে একই নাম আছে কি না check করে।</li>
+        <li><code>ModelState.IsValid</code> হলে database-এ save করে।</li>
+        <li><code>TempData</code> redirect-এর পর success notification দেখানোর জন্য message বহন করে।</li>
+        <li>Validation fail হলে entered values সহ একই view ফেরত দেয়।</li>
+    </ul>
+
+    <h3>Update</h3>
+    <pre>[HttpGet]
+public IActionResult Update(int? id)
+{
+    if (id == null || id == 0) return NotFound();
+
+    var category = _context.Categories.Find(id);
+    if (category == null) return NotFound();
+
+    return View(category);
+}</pre>
+    <p>URL-এর id দিয়ে category খুঁজে Update form-এ পাঠায়। id না থাকলে বা category না পেলে 404 Not Found দেয়।</p>
+
+    <pre>[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Update(Category category)
+{
+    if (!string.IsNullOrEmpty(category.Name) &amp;&amp;
+        _context.Categories.Any(c =&gt;
+            c.CategoryIdentification != category.CategoryIdentification &amp;&amp;
+            c.Name.ToLower() == category.Name.ToLower()))
+    {
+        ModelState.AddModelError("", "Category name already exists!");
+    }
+
+    if (ModelState.IsValid)
+    {
+        _context.Categories.Update(category);
+        _context.SaveChanges();
+        TempData["success"] = "Category updated successfully";
+        return RedirectToAction("Index");
+    }
+
+    return View(category);
+}</pre>
+    <p>নিজের record বাদ দিয়ে duplicate name check করা হয়েছে। <code>Update()</code> entity-এর existing record পরিবর্তন করে।</p>
+
+    <h3>Delete</h3>
+    <pre>[HttpGet]
+public IActionResult Delete(int? id)
+{
+    if (id == null || id == 0) return NotFound();
+
+    var category = _context.Categories.Find(id);
+    if (category == null) return NotFound();
+
+    return View(category);
+}</pre>
+    <p>Delete করার আগে confirmation view দেখায়।</p>
+
+    <pre>[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Delete(Category category)
+{
+    var categoryToDelete = _context.Categories.Find(category.CategoryIdentification);
+    if (categoryToDelete == null) return NotFound();
+
+    _context.Categories.Remove(categoryToDelete);
+    _context.SaveChanges();
+    TempData["success"] = "Category deleted successfully";
+
+    return RedirectToAction(nameof(Index));
+}</pre>
+    <p>Hidden primary key ব্যবহার করে database থেকে সঠিক category delete করে।</p>
+
+    <h2>6. Views এবং Razor code</h2>
+    <h3>Index.cshtml</h3>
+    <pre>@model List&lt;BookGarden.Models.Category&gt;
+
+@foreach (var category in Model)
+{
+    &lt;td&gt;@category.Name&lt;/td&gt;
+    &lt;a asp-action="Update"
+       asp-route-id="@category.CategoryIdentification"&gt;Edit&lt;/a&gt;
+    &lt;a asp-action="Delete"
+       asp-route-id="@category.CategoryIdentification"&gt;Delete&lt;/a&gt;
+}</pre>
+    <p><code>@model</code> view-এর expected data type নির্ধারণ করে। <code>foreach</code> প্রতিটি category table row হিসেবে দেখায়। <code>asp-action</code> এবং <code>asp-route-id</code> সঠিক URL তৈরি করে।</p>
+    <div class="box warning"><strong>আগের error:</strong> একই anchor tag-এ <code>href="#"</code> এবং <code>asp-action</code> ছিল। Anchor Tag Helper নিজে href তৈরি করে, তাই explicit href সরানো হয়েছে।</div>
+
+    <h3>Create.cshtml</h3>
+    <pre>&lt;form method="post"&gt;
+    &lt;input asp-for="Name" /&gt;
+    &lt;input asp-for="DisplayOrder" /&gt;
+    &lt;button type="submit"&gt;Create Category&lt;/button&gt;
+&lt;/form&gt;</pre>
+    <p><code>asp-for</code> input-কে Model property-এর সঙ্গে bind করে। Form POST করলে controller-এর Create POST action receive করে।</p>
+
+    <h3>Update.cshtml</h3>
+    <pre>&lt;form asp-action="Update" method="post"&gt;
+    &lt;input asp-for="CategoryIdentification" type="hidden" /&gt;
+    &lt;input asp-for="Name" /&gt;
+    &lt;input asp-for="DisplayOrder" /&gt;
+    &lt;button type="submit"&gt;Save Changes&lt;/button&gt;
+&lt;/form&gt;</pre>
+    <p>Hidden primary key না পাঠালে controller বুঝতে পারত না কোন category update করতে হবে।</p>
+
+    <h3>Delete.cshtml</h3>
+    <pre>&lt;form asp-action="Delete" method="post"&gt;
+    &lt;input asp-for="CategoryIdentification" type="hidden" /&gt;
+    &lt;button type="submit"&gt;Delete Category&lt;/button&gt;
+&lt;/form&gt;</pre>
+    <p>Delete confirmation view details দেখায় এবং POST submit করে। GET request দিয়ে সরাসরি database delete করা হয়নি—এটি নিরাপদ design।</p>
+
+    <h2>7. Layout এবং shared components</h2>
+    <h3>_ViewStart.cshtml</h3>
+    <pre>@{
+    Layout = "_Layout";
+}</pre>
+    <p>সব Razor view automatically shared layout ব্যবহার করে।</p>
+
+    <h3>_ViewImports.cshtml</h3>
+    <pre>@using BookGarden
+@using BookGarden.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers</pre>
+    <p>Common namespaces এবং MVC Tag Helpers সব view-তে available করে।</p>
+
+    <h3>_Layout.cshtml</h3>
+    <ul>
+        <li>Navbar এবং footer তৈরি করে।</li>
+        <li>Bootstrap, Bootstrap Icons, custom CSS load করে।</li>
+        <li><code>~/Image/book.png</code> logo দেখায়।</li>
+        <li>jQuery এবং Toastr JavaScript load করে।</li>
+        <li><code>&lt;partial name="_notification" /&gt;</code> ব্যবহার করে সব page-এ notification available করে।</li>
+        <li><code>@RenderBody()</code> current page-এর content দেখায়।</li>
+    </ul>
+
+    <h2>8. Toastr notification system</h2>
+    <p>Shared partial file: <code>Views/Shared/_notification.cshtml</code></p>
+    <pre>@if (TempData["success"] != null)
+{
+    &lt;script&gt;
+        window.addEventListener('load', function () {
+            toastr.success('@TempData["success"]');
+        });
+    &lt;/script&gt;
+}
+
+@if (TempData["error"] != null)
+{
+    &lt;script&gt;
+        window.addEventListener('load', function () {
+            toastr.error('@TempData["error"]');
+        });
+    &lt;/script&gt;
+}</pre>
+    <p>Controller message set করে, redirect-এর পর Layout partial message পড়ে Toastr popup দেখায়। একই code প্রতিটি view-তে লিখতে হয় না—এটাই DRY rule।</p>
+
+    <h2>9. যে errors হয়েছিল এবং কেন হয়েছিল</h2>
+    <table>
+        <tr><th>Error/problem</th><th>Root cause</th><th>Fix</th></tr>
+        <tr><td>Razor Model null</td><td>Controller category list load করলেও <code>return View()</code> ব্যবহার করেছিল।</td><td><code>return View(categories)</code> করা হয়েছে।</td></tr>
+        <tr><td>Book image দেখা যাচ্ছিল না</td><td>Image <code>Images</code> folder-এ ছিল, যা default static root নয়।</td><td>PhysicalFileProvider দিয়ে <code>/Image</code> route করা হয়েছে।</td></tr>
+        <tr><td>Update page blank</td><td><code>Update.cshtml</code>-এ শুধু model declaration ছিল, form ছিল না।</td><td>সম্পূর্ণ update form যোগ করা হয়েছে।</td></tr>
+        <tr><td>AnchorTagHelper InvalidOperationException</td><td><code>href="#"</code> এবং <code>asp-action</code> একসঙ্গে ছিল।</td><td>Explicit href সরানো হয়েছে।</td></tr>
+        <tr><td>Update compile error</td><td>Model-এ <code>Id</code> property নেই; আসল property <code>CategoryIdentification</code>।</td><td>সঠিক primary key ব্যবহার করা হয়েছে।</td></tr>
+        <tr><td>Delete কাজ করছিল না</td><td>Delete action/view ছিল না বা direct link ছিল।</td><td>GET confirmation এবং POST delete action তৈরি করা হয়েছে।</td></tr>
+        <tr><td>Success message reusable ছিল না</td><td>Notification code view-এর ভিতরে লেখা ছিল।</td><td>Shared <code>_notification.cshtml</code> partial তৈরি করা হয়েছে।</td></tr>
+    </table>
+
+    <h2>10. Configuration এবং database</h2>
+    <h3>appsettings.Development.json</h3>
+    <pre>"ConnectionStrings": {
+  "SQLConnection": "Server=(localdb)\\mssqllocaldb;Database=BookGardenDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+}</pre>
+    <p>Development environment-এ LocalDB database-এর connection string। Production-এ real SQL Server connection string ব্যবহার করা উচিত এবং secret source control-এ রাখা উচিত নয়।</p>
+
+    <h3>BookGarden.csproj</h3>
+    <ul>
+        <li>Target framework: <code>net10.0</code></li>
+        <li>Nullable এবং implicit usings enabled।</li>
+        <li>Entity Framework Core, SQL Server এবং EF Tools packages installed।</li>
+    </ul>
+
+    <h2>11. User flow</h2>
+    <ol>
+        <li><strong>Categories menu:</strong> <code>/Category/Index</code> বা <code>/Category</code> খুলে list দেখায়।</li>
+        <li><strong>New Category:</strong> Create form খুলে; submit করলে validation, save এবং success Toastr চলে।</li>
+        <li><strong>Edit:</strong> Update page খুলে; existing data দেখায়; save করলে database update হয়।</li>
+        <li><strong>Delete:</strong> Delete confirmation page খুলে; confirm করলে category delete হয়।</li>
+        <li><strong>Cancel:</strong> user category list page-এ ফিরে যায়।</li>
+    </ol>
+
+    <h2>12. PDF বানানোর নিয়ম</h2>
+    <div class="box success">
+        <strong>সবচেয়ে সহজ পদ্ধতি:</strong>
+        <ol>
+            <li>এই file-টি open করুন: <code>BookGarden_Full_Project_Documentation.html</code></li>
+            <li>Google Chrome অথবা Microsoft Edge browser ব্যবহার করুন। দুটিই ভালো কাজ করবে।</li>
+            <li>File-এর উপর right-click করে <strong>Open with → Google Chrome</strong> অথবা <strong>Microsoft Edge</strong> নির্বাচন করুন।</li>
+            <li>Browser-এ <strong>Ctrl + P</strong> চাপুন। Mac হলে <strong>Cmd + P</strong>।</li>
+            <li>Printer/Destination হিসেবে <strong>Save as PDF</strong> নির্বাচন করুন।</li>
+            <li>Paper size <strong>A4</strong> রাখুন।</li>
+            <li>Background graphics চালু করলে headings এবং colored boxes ভালো দেখাবে।</li>
+            <li><strong>Save</strong> চাপুন এবং file name দিন: <code>BookGarden_Full_Project_Documentation.pdf</code></li>
+        </ol>
+    </div>
+    <p><strong>Chrome বা Edge—কোনটি ব্যবহার করবেন?</strong> Chrome সবচেয়ে সহজ; Edge-ও একইভাবে কাজ করবে। Internet না থাকলেও এই HTML file-এর text দেখা যাবে, তবে Toastr-এর external CSS/JavaScript load নাও হতে পারে—documentation PDF বানাতে এতে সমস্যা হবে না।</p>
+
+    <h2>13. Final checklist</h2>
+    <ul>
+        <li>Application run করুন।</li>
+        <li><code>/Category</code> খুলে list দেখুন।</li>
+        <li>Create করে success Toastr দেখুন।</li>
+        <li>Edit করে update notification দেখুন।</li>
+        <li>Delete page খুলে confirmation দেখুন।</li>
+        <li>BookGarden logo দেখা যাচ্ছে কি না পরীক্ষা করুন।</li>
+        <li>তারপর এই documentation HTML browser-এ খুলে PDF হিসেবে save করুন।</li>
+    </ul>
+</body>
+</html>

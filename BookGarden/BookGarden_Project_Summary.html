@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>BookGarden Project Summary</title>
+    <style>
+        body {
+            font-family: "Noto Sans Bengali", "Segoe UI", Arial, sans-serif;
+            line-height: 1.7;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 30px;
+            color: #333;
+        }
+        h1 { color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 10px; }
+        h2 { color: #8e44ad; margin-top: 25px; }
+        code { background: #f1f1f1; padding: 2px 5px; border-radius: 4px; }
+        li { margin-bottom: 8px; }
+        .date { color: #777; }
+        @media print {
+            body { margin: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>BookGarden Project Summary</h1>
+    <p class="date">Project development summary</p>
+
+    <h2>1. Category list null error fix</h2>
+    <p>Category controller থেকে category list view-তে পাঠানো হয়েছে। এর ফলে Razor view-এর <code>Model</code> আর null থাকে না।</p>
+
+    <h2>2. Book image fix</h2>
+    <p><code>Images/book.png</code> file serve করার জন্য <code>/Image</code> static route তৈরি করা হয়েছে। Layout-এ image path ঠিক করা হয়েছে:</p>
+    <p><code>~/Image/book.png</code></p>
+
+    <h2>3. Category Create</h2>
+    <ul>
+        <li>নতুন category database-এ save করার ব্যবস্থা করা হয়েছে।</li>
+        <li>Duplicate category name validation যোগ করা হয়েছে।</li>
+        <li>নতুন category তৈরি হলে success message দেখানোর ব্যবস্থা করা হয়েছে।</li>
+    </ul>
+
+    <h2>4. Category Update</h2>
+    <ul>
+        <li>Update action-এর ভুল bracket এবং structure ঠিক করা হয়েছে।</li>
+        <li>Category update করার জন্য <code>Update()</code> ব্যবহার করা হয়েছে।</li>
+        <li>Primary key হিসেবে সঠিক property <code>CategoryIdentification</code> ব্যবহার করা হয়েছে।</li>
+        <li>নিজের category-কে duplicate হিসেবে গণনা করা হয় না।</li>
+        <li>Update form view তৈরি করা হয়েছে।</li>
+    </ul>
+
+    <h2>5. Category Delete</h2>
+    <ul>
+        <li>আলাদা <code>Delete.cshtml</code> confirmation view তৈরি করা হয়েছে।</li>
+        <li>Delete করার আগে category details দেখা যায়।</li>
+        <li>GET action confirmation page দেখায়।</li>
+        <li>POST action database থেকে category delete করে।</li>
+        <li>Delete সফল হলে success notification দেখায়।</li>
+    </ul>
+
+    <h2>6. Reusable notification partial</h2>
+    <p><code>Views/Shared/_notification.cshtml</code> নামে একটি reusable partial view তৈরি করা হয়েছে। এটি success এবং error message handle করে।</p>
+
+    <h2>7. Toastr notification</h2>
+    <ul>
+        <li>Toastr CSS এবং JavaScript layout-এ যোগ করা হয়েছে।</li>
+        <li>Create, Update এবং Delete সফল হলে popup notification দেখা যায়।</li>
+        <li>Notification partial-টি <code>_Layout.cshtml</code>-এ রাখা হয়েছে।</li>
+        <li>তাই যেকোনো page থেকে <code>TempData["success"]</code> অথবা <code>TempData["error"]</code> ব্যবহার করা যাবে।</li>
+    </ul>
+
+    <h2>8. DRY rule</h2>
+    <p>Notification markup একাধিক view-তে না লিখে shared partial view ব্যবহার করা হয়েছে। ফলে একই code পুনরায় লেখার প্রয়োজন নেই।</p>
+</body>
+</html>
