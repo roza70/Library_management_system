@@ -32,9 +32,8 @@ namespace BookGarden.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DisplayOrder")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -50,21 +49,21 @@ namespace BookGarden.Migrations
                         {
                             CategoryIdentification = 1,
                             Description = "Action genre books",
-                            DisplayOrder = "1",
+                            DisplayOrder = 1,
                             Name = "Action"
                         },
                         new
                         {
                             CategoryIdentification = 2,
                             Description = "Science fiction books",
-                            DisplayOrder = "2",
+                            DisplayOrder = 2,
                             Name = "Sci-Fi"
                         },
                         new
                         {
                             CategoryIdentification = 3,
                             Description = "History genre books",
-                            DisplayOrder = "3",
+                            DisplayOrder = 3,
                             Name = "History"
                         });
                 });

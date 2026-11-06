@@ -1,7 +1,7 @@
 @model BookGarden.Models.Category
 
 <div class="container mt-4">
-	<a asp-controller="Category" asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3">
+	<a asp-area="Admin" asp-controller="Category" asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3">
 		<i class="bi bi-arrow-left"></i> Back to categories
 	</a>
 
@@ -20,12 +20,12 @@
 				<dd class="col-sm-8">@Model.DisplayOrder</dd>
 			</dl>
 
-			<form asp-action="Delete" method="post">
+			<form asp-area="Admin" asp-action="Delete" method="post">
 				<input asp-for="CategoryIdentification" type="hidden" />
 				<button type="submit" class="btn btn-fairy-delete">
 					<i class="bi bi-trash me-1"></i>Delete Category
 				</button>
-				<a asp-controller="Category" asp-action="Index" class="btn btn-fairy-cancel ms-2">Cancel</a>
+				<a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-fairy-cancel ms-2">Cancel</a>
 			</form>
 		</div>
 	</div>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BookGarden/BookGarden.csproj" />
+  <Project Path="BookGardenDataAccess/BookGardenDataAccess.csproj" />
+  <Project Path="BookGarden.Business/BookGarden.Business.csproj" />
+  <Project Path="BookGardenUtility/BookGardenUtility.csproj" />
+</Solution>

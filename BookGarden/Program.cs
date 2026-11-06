@@ -1,4 +1,6 @@
 using BookGarden.Data;
+using BookGarden.Services;
+using BookGardenDataAccess.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -6,13 +8,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SQLConnection"),
+        sqlOptions => sqlOptions.MigrationsAssembly("BookGarden"));
 });
 
 var app = builder.Build();
+
+// Apply pending schema changes before any request can read Category.DisplayOrder.
+// This is required because the current model expects DisplayOrder to be an int,
+// while older databases may still have the original nvarchar column.
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -35,6 +49,11 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
