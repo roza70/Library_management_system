@@ -67,6 +67,170 @@ namespace BookGarden.Migrations
                             Name = "History"
                         });
                 });
+
+            modelBuilder.Entity("BookGarden.Models.Product", b =>
+                {
+                    b.Property<int>("ProductIdentification")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductIdentification"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CategoryIdentification")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ISBN")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("ListPrice")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price100")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price50")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductIdentification");
+
+                    b.HasIndex("CategoryIdentification");
+
+                    b.ToTable("Products");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductIdentification = 1,
+                            Author = "Alba Solver",
+                            CategoryIdentification = 1,
+                            Description = "A thrilling adventure deep in the heart of an uncharted jungle, where ancient secrets and hidden treasures await those brave enough to seek them.",
+                            ISBN = "JNG7777770001",
+                            ImageUrl = "",
+                            ListPrice = 45.0,
+                            Price100 = 30.0,
+                            Price50 = 35.0,
+                            Title = "Store of the Jungle"
+                        },
+                        new
+                        {
+                            ProductIdentification = 2,
+                            Author = "Bob Roarman",
+                            CategoryIdentification = 3,
+                            Description = "An insightful exploration of wealth, ambition, and the relentless passage of time. A story that challenges what it truly means to be rich.",
+                            ISBN = "MNT8888880001",
+                            ImageUrl = "",
+                            ListPrice = 55.0,
+                            Price100 = 40.0,
+                            Price50 = 45.0,
+                            Title = "Money and Time"
+                        },
+                        new
+                        {
+                            ProductIdentification = 3,
+                            Author = "Jessica Alban",
+                            CategoryIdentification = 1,
+                            Description = "A mysterious tale set around a remote lake where strange occurrences lead a young detective to uncover a decades-old secret buried beneath the water.",
+                            ISBN = "LKE9999990001",
+                            ImageUrl = "",
+                            ListPrice = 35.0,
+                            Price100 = 25.0,
+                            Price50 = 28.0,
+                            Title = "Secret of the Lake"
+                        },
+                        new
+                        {
+                            ProductIdentification = 4,
+                            Author = "Kristen Lober",
+                            CategoryIdentification = 2,
+                            Description = "A captivating journey through the cosmos, blending science and imagination as humanity reaches beyond the stars for the very first time.",
+                            ISBN = "SPC1010100001",
+                            ImageUrl = "",
+                            ListPrice = 65.0,
+                            Price100 = 50.0,
+                            Price50 = 55.0,
+                            Title = "Moon and Planets"
+                        },
+                        new
+                        {
+                            ProductIdentification = 5,
+                            Author = "Laura Goldberg",
+                            CategoryIdentification = 3,
+                            Description = "At the edge of an ancient forest, dawn reveals more than just light. A poetic novel about renewal, loss, and the quiet strength found in nature.",
+                            ISBN = "FRD1111110001",
+                            ImageUrl = "",
+                            ListPrice = 30.0,
+                            Price100 = 20.0,
+                            Price50 = 24.0,
+                            Title = "Forest and Dawn"
+                        },
+                        new
+                        {
+                            ProductIdentification = 6,
+                            Author = "Elara Vance",
+                            CategoryIdentification = 1,
+                            Description = "Deep within a forgotten grove, the trees hold memories of those who came before. A hauntingly beautiful story of legacy and belonging.",
+                            ISBN = "WGR1212120001",
+                            ImageUrl = "",
+                            ListPrice = 42.0,
+                            Price100 = 30.0,
+                            Price50 = 34.0,
+                            Title = "The Whispering Grove"
+                        },
+                        new
+                        {
+                            ProductIdentification = 7,
+                            Author = "Anya Ravenwood",
+                            CategoryIdentification = 2,
+                            Description = "A brilliant cryptographer stumbles upon an ancient code that could rewrite history. But cracking it means confronting a conspiracy centuries in the making.",
+                            ISBN = "CIP1313130001",
+                            ImageUrl = "",
+                            ListPrice = 50.0,
+                            Price100 = 35.0,
+                            Price50 = 40.0,
+                            Title = "The Forgotten Cipher"
+                        },
+                        new
+                        {
+                            ProductIdentification = 8,
+                            Author = "Elara Vance",
+                            CategoryIdentification = 3,
+                            Description = "When silence falls over a once-thriving orchard, one woman returns to her childhood home to uncover the truth behind its abandonment and her family's past.",
+                            ISBN = "ORC1414140001",
+                            ImageUrl = "",
+                            ListPrice = 38.0,
+                            Price100 = 26.0,
+                            Price50 = 30.0,
+                            Title = "The Silent Orchard"
+                        });
+                });
+
+            modelBuilder.Entity("BookGarden.Models.Product", b =>
+                {
+                    b.HasOne("BookGarden.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryIdentification")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
 #pragma warning restore 612, 618
         }
     }

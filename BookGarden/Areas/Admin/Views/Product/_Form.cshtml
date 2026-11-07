@@ -1,0 +1,13 @@
+@model BookGarden.Models.Product
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+<div class="row g-3">
+	<div class="col-md-8"><label asp-for="Title" class="fairy-label"></label><input asp-for="Title" class="form-control fairy-input" /><span asp-validation-for="Title" class="text-danger"></span></div>
+	<div class="col-md-4"><label asp-for="ISBN" class="fairy-label"></label><input asp-for="ISBN" class="form-control fairy-input" /><span asp-validation-for="ISBN" class="text-danger"></span></div>
+	<div class="col-md-6"><label asp-for="Author" class="fairy-label"></label><input asp-for="Author" class="form-control fairy-input" /><span asp-validation-for="Author" class="text-danger"></span></div>
+	<div class="col-md-6"><label asp-for="CategoryIdentification" class="fairy-label">Category</label><select asp-for="CategoryIdentification" asp-items="ViewBag.Categories" class="form-select fairy-input"><option value="">Select a category</option></select></div>
+	<div class="col-12"><label asp-for="Description" class="fairy-label"></label><textarea asp-for="Description" class="form-control fairy-input" rows="3"></textarea></div>
+	<div class="col-md-4"><label asp-for="ListPrice" class="fairy-label"></label><input asp-for="ListPrice" class="form-control fairy-input" type="number" step="0.01" /></div>
+	<div class="col-md-4"><label asp-for="Price50" class="fairy-label"></label><input asp-for="Price50" class="form-control fairy-input" type="number" step="0.01" /></div>
+	<div class="col-md-4"><label asp-for="Price100" class="fairy-label"></label><input asp-for="Price100" class="form-control fairy-input" type="number" step="0.01" /></div>
+	<div class="col-12"><label asp-for="ImageUrl" class="fairy-label"></label><input asp-for="ImageUrl" class="form-control fairy-input" /></div>
+</div>

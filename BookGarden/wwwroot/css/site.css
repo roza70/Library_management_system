@@ -12,6 +12,22 @@
     --plum-soft: #8a6a8e;
 }
 
+/* ----- Product management ----- */
+.product-description {
+    max-width: 34rem;
+    color: var(--plum-soft);
+}
+
+.product-price {
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--mint-text);
+}
+
+.product-table {
+    min-width: 60rem;
+}
+
 .fairy-body {
     font-family: 'Quicksand', sans-serif;
     color: var(--plum);

@@ -1,0 +1,28 @@
+@model BookGarden.Models.Product
+
+<div class="container mt-4">
+	<a asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3">
+		<i class="bi bi-arrow-left"></i> Back to products
+	</a>
+	<div class="card fairy-card overflow-hidden">
+		<div class="fairy-card-header">
+			<h5 class="mb-1 fw-bold text-danger"><i class="bi bi-trash me-2"></i>Delete Product</h5>
+			<p class="mb-0 small fairy-subtitle">Are you sure you want to delete this product?</p>
+		</div>
+		<div class="card-body fairy-form-body">
+			<dl class="row mb-4">
+				<dt class="col-sm-4 fairy-label">Title</dt>
+				<dd class="col-sm-8">@Model.Title</dd>
+				<dt class="col-sm-4 fairy-label">Author</dt>
+				<dd class="col-sm-8">@Model.Author</dd>
+				<dt class="col-sm-4 fairy-label">ISBN</dt>
+				<dd class="col-sm-8">@Model.ISBN</dd>
+			</dl>
+			<form asp-action="Delete" method="post">
+				<input asp-for="ProductIdentification" type="hidden" />
+				<button type="submit" class="btn btn-fairy-delete" data-confirm="Delete this product? This action cannot be undone."><i class="bi bi-trash me-1"></i>Delete Product</button>
+				<a asp-action="Index" class="btn btn-fairy-cancel ms-2">Cancel</a>
+			</form>
+		</div>
+	</div>
+</div>

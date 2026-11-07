@@ -1,0 +1,12 @@
+@model BookGarden.Models.Product
+
+<div class="container mt-4">
+	<a asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3"><i class="bi bi-arrow-left"></i> Back to products</a>
+	<div class="card fairy-card"><div class="fairy-card-header"><h5 class="mb-1 fw-bold">Create Product</h5></div>
+		<form asp-action="Create" method="post" class="card-body fairy-form-body">
+			<partial name="_Form" model="Model" />
+			<div class="d-flex gap-3"><button class="btn btn-fairy-create" type="submit">Create Product</button><a asp-action="Index" class="btn btn-fairy-cancel">Cancel</a></div>
+		</form>
+	</div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,43 @@
+@model IReadOnlyList<BookGarden.Models.Product>
+
+<div class="container mt-4" data-product-list data-products-api-url="/api/products">
+	<div class="card fairy-card overflow-hidden">
+		<div class="fairy-card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+			<div>
+				<h5 class="mb-1 fw-bold"><i class="bi bi-book me-2"></i>Products</h5>
+				<p class="mb-0 small fairy-subtitle">Manage the books in your store</p>
+			</div>
+			<a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn btn-fairy-new">
+				<i class="bi bi-plus-lg"></i> New Product
+			</a>
+		</div>
+		<div class="table-responsive">
+			<table class="table fairy-table align-middle mb-0">
+				<thead><tr><th>Title</th><th>Author</th><th>Category</th><th>ISBN</th><th>List Price</th><th class="text-end">Actions</th></tr></thead>
+				<tbody id="products-table-body">
+				@if (Model.Count == 0)
+				{
+					<tr><td colspan="6" class="text-center py-4">No products found.</td></tr>
+				}
+				else
+				{
+					@foreach (var product in Model)
+					{
+						<tr>
+							<td class="fairy-name">@product.Title</td>
+							<td>@product.Author</td>
+							<td>@(product.Category?.Name ?? "Uncategorized")</td>
+							<td>@product.ISBN</td>
+							<td>@product.ListPrice.ToString("C")</td>
+							<td class="text-end"><div class="d-inline-flex gap-2">
+								<a asp-action="Update" asp-route-id="@product.ProductIdentification" class="btn btn-sm btn-fairy-edit">Edit</a>
+								<a asp-action="Delete" asp-route-id="@product.ProductIdentification" class="btn btn-sm btn-fairy-delete">Delete</a>
+							</div></td>
+						</tr>
+					}
+				}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
