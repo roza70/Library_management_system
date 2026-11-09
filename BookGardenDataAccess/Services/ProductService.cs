@@ -11,12 +11,13 @@ public sealed class ProductService : IProductService
 
     public ProductService(ApplicationDbContext context) => _context = context;
 
-    public async Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default) =>
-        await _context.Products
-            .AsNoTracking()
-            .Include(product => product.Category)
-            .OrderBy(product => product.Title)
-            .ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<Product>> GetAllAsync(
+    CancellationToken cancellationToken = default) =>
+    await _context.Products
+        .AsNoTracking()
+        .Include(product => product.Category)
+        .OrderBy(product => product.Title)
+        .ToListAsync(cancellationToken);
 
     public Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _context.Products
