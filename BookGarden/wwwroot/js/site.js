@@ -1,16 +1,61 @@
 ﻿
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. Handle confirmation messages
-    document.querySelectorAll('[data-confirm]').forEach((element) => {
-        element.addEventListener('click', (event) => {
-            const message = element.getAttribute('data-confirm');
+    // 1. Handle confirmation messages using SweetAlert2
+    document.addEventListener('click', async (event) => {
+        const element = event.target.closest('[data-confirm]');
 
-            if (message && !window.confirm(message)) {
-                event.preventDefault();
+        if (!element) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const message = element.getAttribute('data-confirm');
+
+        if (!message) {
+            return;
+        }
+
+        // Fallback if SweetAlert2 is unavailable
+        if (typeof Swal === 'undefined') {
+            if (window.confirm(message)) {
+                if (element.matches('button[type="submit"], input[type="submit"]')) {
+                    element.form?.requestSubmit(element);
+                } else if (element.tagName === 'A') {
+                    window.location.assign(element.href);
+                }
             }
+
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d63384',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
         });
+
+        if (result.isConfirmed) {
+
+            // Submit the existing POST form
+            if (element.matches('button[type="submit"], input[type="submit"]')) {
+                element.form?.requestSubmit(element);
+            }
+
+            // Navigate if the confirmed element is a link
+            else if (element.tagName === 'A') {
+                window.location.assign(element.href);
+            }
+        }
     });
+
 
     // 2. Load products from API
     const productPage = document.querySelector('[data-product-list]');
@@ -40,11 +85,11 @@ async function loadProducts(apiUrl, tableBody) {
         // Clear existing server-rendered rows
         tableBody.replaceChildren();
 
-       
         // Display each product
         products.forEach((product) => {
             tableBody.appendChild(createProductRow(product));
         });
+
         // Initialize DataTables
         new DataTable('#productTable', {
             pageLength: 10,

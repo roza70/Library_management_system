@@ -11,4 +11,39 @@
 		</form>
 	</div>
 </div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editorElement = document.getElementById('product-description-editor');
+            const descriptionInput = document.getElementById('Product_Description');
+
+            if (!editorElement || !descriptionInput || typeof Quill === 'undefined') {
+                return;
+            }
+
+            const quill = new Quill('#product-description-editor', {
+                theme: 'snow',
+                placeholder: 'Write product description...',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            quill.root.innerHTML = descriptionInput.value || '';
+
+            const form = editorElement.closest('form');
+
+            form.addEventListener('submit', function () {
+                descriptionInput.value = quill.root.innerHTML;
+            });
+        });
+    </script>
+}

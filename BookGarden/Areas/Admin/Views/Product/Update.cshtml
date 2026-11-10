@@ -1,13 +1,77 @@
-@model BookGarden.Models.Product
+@model BookGarden.Models.ViewModels.ProductViewModel
 
 <div class="container mt-4">
-	<a asp-action="Index" class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3"><i class="bi bi-arrow-left"></i> Back to products</a>
-	<div class="card fairy-card"><div class="fairy-card-header"><h5 class="mb-1 fw-bold">Update Product</h5></div>
-		<form asp-action="Update" method="post" class="card-body fairy-form-body">
-			<input asp-for="ProductIdentification" type="hidden" />
-			<partial name="_Form" model="Model" />
-			<div class="d-flex gap-3"><button class="btn btn-fairy-create" type="submit">Save Changes</button><a asp-action="Index" class="btn btn-fairy-cancel">Cancel</a></div>
-		</form>
-	</div>
+    <a asp-action="Index"
+       class="fairy-back-link d-inline-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-arrow-left"></i> Back to products
+    </a>
+
+    <div class="card fairy-card">
+        <div class="fairy-card-header">
+            <h5 class="mb-1 fw-bold">Update Product</h5>
+        </div>
+
+        <form asp-action="Update"
+              method="post"
+              enctype="multipart/form-data"
+              class="card-body fairy-form-body">
+
+            <input asp-for="Product.ProductIdentification"
+                   type="hidden" />
+
+            <partial name="_Form" model="Model" />
+
+            <div class="d-flex gap-3">
+                <button class="btn btn-fairy-create" type="submit">
+                    Save Changes
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-fairy-cancel">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editorElement = document.getElementById('product-description-editor');
+            const descriptionInput = document.getElementById('Product_Description');
+
+            if (!editorElement || !descriptionInput || typeof Quill === 'undefined') {
+                return;
+            }
+
+            const quill = new Quill('#product-description-editor', {
+                theme: 'snow',
+                placeholder: 'Write product description...',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            const savedDescription = descriptionInput.value;
+
+            if (savedDescription) {
+                quill.clipboard.dangerouslyPasteHTML(savedDescription);
+            }
+
+            const form = editorElement.closest('form');
+
+            form.addEventListener('submit', function () {
+                descriptionInput.value = quill.root.innerHTML;
+            });
+        });
+    </script>
+}

@@ -33,7 +33,17 @@ public sealed class ProductService : IProductService
 
     public async Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default)
     {
-        _context.Products.Update(product);
+        var existingProduct = await _context.Products
+            .FirstOrDefaultAsync(
+                p => p.ProductIdentification == product.ProductIdentification,
+                cancellationToken);
+
+        if (existingProduct is null)
+            return false;
+
+        _context.Entry(existingProduct)
+            .CurrentValues.SetValues(product);
+
         return await _context.SaveChangesAsync(cancellationToken) > 0;
     }
 

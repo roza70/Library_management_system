@@ -111,30 +111,90 @@ public class ProductController : Controller
 
         await LoadCategoriesAsync(cancellationToken);
 
-        return View(product);
+        var viewModel = new ProductViewModel
+        {
+            Product = product
+        };
+
+        return View(viewModel);
     }
 
     // UPDATE - POST
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(
-        Product product,
+        ProductViewModel viewModel,
         CancellationToken cancellationToken)
     {
+        var existingProduct = await _productService.GetByIdAsync(
+            viewModel.Product.ProductIdentification,
+            cancellationToken);
+
+        if (existingProduct is null)
+            return NotFound();
+
+        // Store the original image URL before updating the tracked entity.
+        var oldImageUrl = existingProduct.ImageUrl;
+
+        // Preserve the existing image unless a new one is uploaded.
+        viewModel.Product.ImageUrl = oldImageUrl;
+
+        string? newImageUrl = null;
+
         if (ModelState.IsValid)
         {
-            await _productService.UpdateAsync(
-                product,
-                cancellationToken);
+            try
+            {
+                newImageUrl = await SaveImageAsync(viewModel.ImageFile);
 
-            TempData["success"] = "Product updated successfully.";
+                if (newImageUrl != null)
+                {
+                    viewModel.Product.ImageUrl = newImageUrl;
+                }
 
-            return RedirectToAction(nameof(Index));
+                var updated = await _productService.UpdateAsync(
+                    viewModel.Product,
+                    cancellationToken);
+
+                if (updated)
+                {
+                    // Delete the original image only after successful update.
+                    if (newImageUrl != null)
+                    {
+                        DeleteImage(oldImageUrl);
+                    }
+
+                    TempData["success"] = "Product updated successfully.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Clean up the newly uploaded image if update fails.
+                if (newImageUrl != null)
+                {
+                    DeleteImage(newImageUrl);
+                }
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Product could not be updated.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(
+                    nameof(viewModel.ImageFile),
+                    ex.Message);
+
+                if (newImageUrl != null)
+                {
+                    DeleteImage(newImageUrl);
+                }
+            }
         }
 
         await LoadCategoriesAsync(cancellationToken);
 
-        return View(product);
+        return View(viewModel);
     }
 
     // DELETE - GET
@@ -160,12 +220,25 @@ public class ProductController : Controller
         Product product,
         CancellationToken cancellationToken)
     {
-        if (!await _productService.DeleteAsync(
-                product.ProductIdentification,
-                cancellationToken))
-        {
+        var existingProduct = await _productService.GetByIdAsync(
+            product.ProductIdentification,
+            cancellationToken);
+
+        if (existingProduct is null)
             return NotFound();
-        }
+
+        // Store image URL before deleting the database entity.
+        var imageUrl = existingProduct.ImageUrl;
+
+        var deleted = await _productService.DeleteAsync(
+            product.ProductIdentification,
+            cancellationToken);
+
+        if (!deleted)
+            return NotFound();
+
+        // Delete associated image after successful database deletion.
+        DeleteImage(imageUrl);
 
         TempData["success"] = "Product deleted successfully.";
 
@@ -233,7 +306,38 @@ public class ProductController : Controller
             await imageFile.CopyToAsync(fileStream);
         }
 
-        // Return image URL
         return $"/images/products/{fileName}";
+    }
+
+    // DELETE PRODUCT IMAGE FILE
+    private void DeleteImage(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return;
+
+        const string imageFolder = "/images/products/";
+
+        if (!imageUrl.StartsWith(
+                imageFolder,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var fileName = Path.GetFileName(imageUrl);
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            return;
+
+        var filePath = Path.Combine(
+            _webHostEnvironment.WebRootPath,
+            "images",
+            "products",
+            fileName);
+
+        if (System.IO.File.Exists(filePath))
+        {
+            System.IO.File.Delete(filePath);
+        }
     }
 }
