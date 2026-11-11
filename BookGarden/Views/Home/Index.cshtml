@@ -1,8 +1,157 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IReadOnlyList<BookGarden.Models.Product>
+
+@{
+    ViewData["Title"] = "Discover Books";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="home-hero">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="home-eyebrow">
+                    <i class="bi bi-stars me-2"></i>
+                    A LITTLE MAGIC IN EVERY BOOK
+                </span>
+
+                <h1 class="home-title mt-3">
+                    Find Your Next
+                    <span>Favorite Story.</span>
+                </h1>
+
+                <p class="home-description mt-3">
+                    Discover wonderful stories, explore new worlds,
+                    and find books that stay with you forever.
+                </p>
+
+                <a href="#book-collection" class="btn home-primary-btn mt-3">
+                    Explore Books
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+
+            <div class="col-lg-5 text-center">
+                <div class="home-hero-art">
+                    <i class="bi bi-book-half"></i>
+                    <span class="hero-sparkle sparkle-one">✦</span>
+                    <span class="hero-sparkle sparkle-two">✧</span>
+                    <span class="hero-sparkle sparkle-three">✦</span>
+                    <p>Stories worth discovering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-collection container py-5" id="book-collection">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+            <span class="home-section-eyebrow">YOUR NEXT ADVENTURE</span>
+            <h2 class="home-section-title mt-2">Explore Our Collection</h2>
+            <p class="home-section-description mb-0">
+                Find something wonderful to read.
+            </p>
+        </div>
+
+        <span class="home-collection-label">
+            <i class="bi bi-bookmark-heart me-1"></i>
+            Made for book lovers
+        </span>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row g-4">
+
+            @foreach (var product in Model)
+            {
+                var imageUrl = product.ImageUrl?.Trim();
+
+                if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    imageUrl = imageUrl.Replace('\\', '/');
+
+                    if (imageUrl.StartsWith("~/", StringComparison.Ordinal))
+                    {
+                        imageUrl = imageUrl[1..];
+                    }
+
+                    if (imageUrl.StartsWith("/Image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        imageUrl = "/images/" + imageUrl[7..];
+                    }
+                    else if (imageUrl.StartsWith("/Images/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        imageUrl = "/images/" + imageUrl[8..];
+                    }
+                    else if (!imageUrl.StartsWith("/", StringComparison.Ordinal))
+                    {
+                        imageUrl = "/images/products/" + imageUrl;
+                    }
+                }
+
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+
+                    <div class="card h-100 shadow-sm border-0">
+
+                        @if (!string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            <img src="@imageUrl"
+                                 class="card-img-top"
+                                 alt="@product.Title"
+                                 style="height: 260px; object-fit: contain;" />
+                        }
+                        else
+                        {
+                            <img src="~/images/book.png"
+                                 class="card-img-top"
+                                 alt="No product image"
+                                 style="height: 260px; object-fit: contain;" />
+                        }
+
+                        <div class="card-body d-flex flex-column">
+
+                            <h5 class="card-title">
+                                @product.Title
+                            </h5>
+
+                            <p class="text-muted mb-2">
+                                By @product.Author
+                            </p>
+
+                            <p class="fw-bold mb-3">
+                                @product.ListPrice.ToString("C")
+                            </p>
+
+                            <a asp-controller="Home"
+                               asp-action="Details"
+                               asp-route-id="@product.ProductIdentification"
+                               class="btn home-primary-btn mt-auto">
+                                View Details
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="home-empty-state text-center">
+
+            <div class="home-empty-icon">
+                <i class="bi bi-bookshelf"></i>
+            </div>
+
+            <h3 class="mt-3">Your next favorite book awaits</h3>
+
+            <p class="mb-0">
+                No books are available at the moment.
+            </p>
+
+        </div>
+    }
+
+</section>

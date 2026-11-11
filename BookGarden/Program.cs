@@ -2,7 +2,6 @@ using BookGarden.Data;
 using BookGarden.Services;
 using BookGardenDataAccess.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,12 +41,15 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "Images")),
-    RequestPath = "/Image"
-});
+// Store uploaded images in the existing web root image directory. The project
+// contains a file named "Images" at the content root, so that path cannot be
+// used as a directory.
+var imagesPath = Path.Combine(builder.Environment.WebRootPath!, "images");
+Directory.CreateDirectory(imagesPath);
+
+// Serve wwwroot files, including product images uploaded at runtime, using
+// their normal lowercase URLs such as /images/products/book.png.
+app.UseStaticFiles();
 
 app.MapStaticAssets();
 

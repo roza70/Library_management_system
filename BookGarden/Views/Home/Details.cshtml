@@ -1,0 +1,121 @@
+﻿@model BookGarden.Models.Product
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="container py-5">
+
+    <div class="mb-4">
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Books
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="row g-0">
+
+            <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-4">
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl"
+                         alt="@Model.Title"
+                         class="img-fluid rounded-3 shadow-sm"
+                         style="max-height: 480px; object-fit: contain;" />
+                }
+                else
+                {
+                    <div class="text-center text-secondary py-5">
+                        <i class="bi bi-book display-1"></i>
+                        <p class="mt-3">No cover available</p>
+                    </div>
+                }
+
+            </div>
+
+            <div class="col-md-7">
+                <div class="card-body p-4 p-lg-5">
+
+                    <span class="badge bg-success-subtle text-success mb-3">
+                        @(Model.Category?.Name ?? "Book")
+                    </span>
+
+                    <h1 class="display-6 fw-bold mb-2">
+                        @Model.Title
+                    </h1>
+
+                    <p class="text-muted fs-5 mb-4">
+                        By @Model.Author
+                    </p>
+
+                    <hr />
+
+                    <h5 class="fw-bold mb-3">About This Book</h5>
+
+                    <div class="text-secondary mb-4">
+                        @Html.Raw(Model.Description)
+                    </div>
+
+                    <div class="mb-4">
+                        <p><strong>ISBN:</strong> @Model.ISBN</p>
+                        <p>
+                            <strong>Category:</strong>
+                            @(Model.Category?.Name ?? "Not specified")
+                        </p>
+                    </div>
+
+                    <hr />
+
+                    <h5 class="fw-bold mb-3">Book Pricing</h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-sm-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted">List Price</small>
+                                <h5 class="fw-bold mt-2 mb-0">
+                                    $@Model.ListPrice.ToString("N2")
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted">50+ Books</small>
+                                <<h5 class="fw-bold mt-2 mb-0">
+                                    $@Model.Price50.ToString("N2")
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted">100+ Books</small>
+                                <h5 class="fw-bold mt-2 mb-0">
+                                    $@Model.Price100.ToString("N2")
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-primary px-4">
+                            Explore More Books
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</section>

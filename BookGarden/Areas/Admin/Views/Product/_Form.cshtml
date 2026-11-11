@@ -1,5 +1,32 @@
 @model BookGarden.Models.ViewModels.ProductViewModel
 
+@{
+    var currentImageUrl = Model.Product.ImageUrl?.Trim();
+
+    if (!string.IsNullOrWhiteSpace(currentImageUrl))
+    {
+        currentImageUrl = currentImageUrl.Replace('\\', '/');
+
+        if (currentImageUrl.StartsWith("~/", StringComparison.Ordinal))
+        {
+            currentImageUrl = currentImageUrl[1..];
+        }
+
+        if (currentImageUrl.StartsWith("/Image/", StringComparison.OrdinalIgnoreCase))
+        {
+            currentImageUrl = "/images/" + currentImageUrl[7..];
+        }
+        else if (currentImageUrl.StartsWith("/Images/", StringComparison.OrdinalIgnoreCase))
+        {
+            currentImageUrl = "/images/" + currentImageUrl[8..];
+        }
+        else if (!currentImageUrl.StartsWith("/", StringComparison.Ordinal))
+        {
+            currentImageUrl = "/images/products/" + currentImageUrl;
+        }
+    }
+}
+
 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
 <div class="row g-3">
@@ -65,12 +92,12 @@
 
     <div class="col-12">
         <label asp-for="ImageFile" class="fairy-label">Product Image</label>
-        @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+        @if (!string.IsNullOrWhiteSpace(currentImageUrl))
         {
             <div class="col-12">
                 <label class="fairy-label">Current Product Image</label>
                 <div>
-                    <img src="@Model.Product.ImageUrl"
+                    <img src="@currentImageUrl"
                          alt="Current product image"
                          style="max-width: 200px; max-height: 200px; object-fit: contain;"
                          class="img-thumbnail" />
