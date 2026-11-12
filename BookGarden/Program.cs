@@ -1,15 +1,19 @@
+
 using BookGarden.Data;
 using BookGarden.Services;
 using BookGardenDataAccess.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+// Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(
@@ -17,38 +21,39 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         sqlOptions => sqlOptions.MigrationsAssembly("BookGarden"));
 });
 
+// Identity Configuration
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 var app = builder.Build();
 
-// Apply pending schema changes before any request can read Category.DisplayOrder.
-// This is required because the current model expects DisplayOrder to be an int,
-// while older databases may still have the original nvarchar column.
-await using (var scope = app.Services.CreateAsyncScope())
+// Apply pending database migrations
+/*await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
 }
-
-// Configure the HTTP request pipeline.
+*/
+// Configure HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
+// Authentication must come before Authorization.
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Store uploaded images in the existing web root image directory. The project
-// contains a file named "Images" at the content root, so that path cannot be
-// used as a directory.
+// Create image directory.
 var imagesPath = Path.Combine(builder.Environment.WebRootPath!, "images");
 Directory.CreateDirectory(imagesPath);
 
-// Serve wwwroot files, including product images uploaded at runtime, using
-// their normal lowercase URLs such as /images/products/book.png.
+// Serve static files.
 app.UseStaticFiles();
 
 app.MapStaticAssets();
